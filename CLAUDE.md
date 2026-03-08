@@ -11,7 +11,7 @@ in the context of a realistic Java microservices application.
 ```
 demo-order-system/
 ├── order-engine/       # Handles order lifecycle: creation, validation, and state transitions.
-│                       # Persists orders to PostgreSQL. Will implement an order state machine.
+│                       # Persists orders to PostgreSQL. Contains the order state machine.
 ├── payment-service/    # Handles payment processing requests from the order engine.
 │                       # Stateless service; no direct database connection.
 ├── docker-compose.yml  # Runs the PostgreSQL 16 instance used by order-engine.
@@ -23,7 +23,7 @@ demo-order-system/
 
 | Layer       | Technology                  |
 |-------------|-----------------------------|
-| Language    | Java 21                     |
+| Language    | Java 17                     |
 | Framework   | Spring Boot 3               |
 | Build tool  | Maven                       |
 | Database    | PostgreSQL 16               |
@@ -31,5 +31,4 @@ demo-order-system/
 
 ## Notes
 
-- **Order state machine:** The order lifecycle state machine (e.g., CREATED → CONFIRMED → SHIPPED → DELIVERED)
-  will be implemented in the next step as part of the `order-engine` service.
+- For the complete order state machine and all valid transitions, see [`docs/state-machine.md`](docs/state-machine.md).

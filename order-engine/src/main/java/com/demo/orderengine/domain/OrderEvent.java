@@ -1,0 +1,13 @@
+package com.demo.orderengine.domain;
+
+public enum OrderEvent {
+    STOCK_RESERVED,
+    STOCK_SOLD_OUT,
+    PAYMENT_RECEIVED,
+    PAYMENT_TIMEOUT,
+    PAYMENT_RETURNED,
+    USER_CANCELLED,
+    RESERVATION_CANCELLED,
+    SHIPMENT_REQUESTED,
+    DELIVERY_CONFIRMED
+}
