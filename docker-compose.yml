@@ -11,5 +11,24 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  order-engine:
+    build: ./order-engine
+    container_name: order-engine
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_db
+      SPRING_DATASOURCE_USERNAME: order_user
+      SPRING_DATASOURCE_PASSWORD: order_pass
+      INTEGRATIONS_PAYMENT_SERVICE_URL: http://payment-service:8081
+    depends_on:
+      - postgres
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    ports:
+      - "8081:8081"
+
 volumes:
   postgres_data:

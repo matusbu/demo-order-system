@@ -17,29 +17,20 @@ A demo e-commerce order management system built for educational purposes — use
 
 ## Getting Started
 
-### 1. Start the database
+### Option A — Full stack via Docker (recommended for manual testing / E2E)
 
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
 
-This starts a PostgreSQL 16 instance on port `5432` with:
-- Database: `order_db`
-- Username: `order_user`
-- Password: `order_pass`
+Starts PostgreSQL, order-engine (port 8080), and payment-service (port 8081).
 
-### 2. Start order-engine
+### Option B — DB only + local Spring Boot (for active development)
 
 ```bash
-cd order-engine
-mvn spring-boot:run
-```
-
-### 3. Start payment-service
-
-```bash
-cd payment-service
-mvn spring-boot:run
+docker-compose up -d postgres   # start only the DB
+cd order-engine && mvn spring-boot:run
+cd payment-service && mvn spring-boot:run
 ```
 
 ### Stop everything
@@ -75,6 +66,9 @@ cd order-engine && mvn test
 ### Layer 3 — E2E Tests
 - **What they test:** Full business workflows end-to-end — all services running, communicating over real HTTP. Validates complete order lifecycle flows across service boundaries.
 - **Tools:** To be defined (candidates: REST Assured, Karate)
-- **Requirement:** All services and the database must be running (`docker-compose up -d` + both Spring Boot apps)
+- **Requirement:** All services and the database must be running
 - **Status:** Not yet implemented — planned for a future phase
-- **Run:** *(to be defined)*
+- **Run:**
+  ```bash
+  docker-compose up -d --build
+  ```
