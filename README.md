@@ -4,10 +4,10 @@ A demo e-commerce order management system built for educational purposes — use
 
 ## Services
 
-| Service           | Port | Description                                      |
-|-------------------|------|--------------------------------------------------|
-| `order-engine`    | 8080 | Manages order lifecycle and persists to Postgres |
-| `payment-service` | 8081 | Stateless payment processing service             |
+| Service           | Port | Description                                      | Swagger UI                                    |
+|-------------------|------|--------------------------------------------------|-----------------------------------------------|
+| `order-engine`    | 8080 | Manages order lifecycle and persists to Postgres | http://localhost:8080/swagger-ui.html         |
+| `payment-service` | 8081 | Stateless payment processing service             | http://localhost:8081/swagger-ui.html         |
 
 ## Prerequisites
 
