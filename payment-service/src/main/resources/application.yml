@@ -4,3 +4,10 @@ spring:
 
 server:
   port: 8081
+
+integrations:
+  order-engine:
+    url: http://localhost:8080
+
+payment:
+  timeout-minutes: 5
