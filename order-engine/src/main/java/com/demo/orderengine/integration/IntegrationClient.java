@@ -24,7 +24,7 @@ public class IntegrationClient {
 
     public void notifyOrderCreated(Order order) {
         paymentClient.post()
-                .uri("/notifications/order-created")
+                .uri("/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new OrderPayload(order.getId(), order.getCustomerName(), order.getProductName(), order.getQuantity()))
                 .retrieve()
@@ -32,39 +32,40 @@ public class IntegrationClient {
     }
 
     public void notifyReserveStock(Order order) {
-        stockClient.post()
-                .uri("/notifications/reserve-stock")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new StockPayload(order.getId(), order.getProductName(), order.getQuantity()))
-                .retrieve()
-                .toBodilessEntity();
+        // TODO: stock-service not implemented yet
+//        stockClient.post()
+//                .uri("/notifications/reserve-stock")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(new StockPayload(order.getId(), order.getProductName(), order.getQuantity()))
+//                .retrieve()
+//                .toBodilessEntity();
     }
 
     public void notifyCancelReservation(Order order) {
-        stockClient.post()
-                .uri("/notifications/cancel-reservation")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new OrderIdPayload(order.getId()))
-                .retrieve()
-                .toBodilessEntity();
+        // TODO: stock-service not implemented yet
+//        stockClient.post()
+//                .uri("/notifications/cancel-reservation")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(new OrderIdPayload(order.getId()))
+//                .retrieve()
+//                .toBodilessEntity();
     }
 
     public void notifyReturnPayment(Order order) {
         paymentClient.post()
-                .uri("/notifications/return-payment")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new OrderIdPayload(order.getId()))
+                .uri("/orders/{orderId}/return", order.getId())
                 .retrieve()
                 .toBodilessEntity();
     }
 
     public void notifyShipOrder(Order order) {
-        stockClient.post()
-                .uri("/notifications/ship-order")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new OrderIdPayload(order.getId()))
-                .retrieve()
-                .toBodilessEntity();
+        // TODO: stock-service not implemented yet
+//        stockClient.post()
+//                .uri("/notifications/ship-order")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(new OrderIdPayload(order.getId()))
+//                .retrieve()
+//                .toBodilessEntity();
     }
 
     private record OrderPayload(UUID orderId, String customerName, String productName, Integer quantity) {}
