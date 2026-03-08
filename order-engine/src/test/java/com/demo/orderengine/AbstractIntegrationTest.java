@@ -5,6 +5,7 @@ import com.demo.orderengine.domain.OrderStatus;
 import com.demo.orderengine.integration.IntegrationClient;
 import com.demo.orderengine.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 
 import static org.mockito.Mockito.reset;
 
+@Tag("integration")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 public abstract class AbstractIntegrationTest {

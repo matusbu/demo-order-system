@@ -3,6 +3,7 @@ package com.demo.orderengine.statemachine;
 import com.demo.orderengine.domain.OrderEvent;
 import com.demo.orderengine.domain.OrderStatus;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -12,6 +13,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Tag("unit")
 class OrderStateMachineTest {
 
     private OrderStateMachine stateMachine;
