@@ -2,8 +2,8 @@
 
 ## Project Purpose
 
-This is an educational demo system built for a **Test Automation YouTube channel**.
-It is used to illustrate testing strategies, the testing pyramid, and design patterns
+A demo e-commerce order management system built for educational purposes — used to
+illustrate Test Automation concepts, testing strategies, and software design patterns
 in the context of a realistic Java microservices application.
 
 ## Monorepo Structure
@@ -13,7 +13,7 @@ demo-order-system/
 ├── order-engine/       # Handles order lifecycle: creation, validation, and state transitions.
 │                       # Persists orders to PostgreSQL. Contains the order state machine.
 ├── payment-service/    # Handles payment processing requests from the order engine.
-│                       # Stateless service; no direct database connection.
+│                       # Holds in-memory timeout state per order; no persistent storage.
 ├── docker-compose.yml  # Runs the PostgreSQL 16 instance used by order-engine.
 ├── CLAUDE.md           # This file.
 └── README.md           # Project overview and startup instructions.
