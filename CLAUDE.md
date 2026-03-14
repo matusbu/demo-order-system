@@ -14,6 +14,10 @@ demo-order-system/
 │                       # Persists orders to PostgreSQL. Contains the order state machine.
 ├── payment-service/    # Handles payment processing requests from the order engine.
 │                       # Holds in-memory timeout state per order; no persistent storage.
+├── stock-service/      # Gateway to the internal warehouse and shipping system.
+│                       # Exposes simulation endpoints for manual triggering of warehouse
+│                       # and shipping outcomes. Holds in-memory reservation/shipment state;
+│                       # no persistent storage.
 ├── docker-compose.yml  # Runs the PostgreSQL 16 instance used by order-engine.
 ├── CLAUDE.md           # This file.
 └── README.md           # Project overview and startup instructions.

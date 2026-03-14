@@ -32,23 +32,19 @@ public class IntegrationClient {
     }
 
     public void notifyReserveStock(Order order) {
-        // TODO: stock-service not implemented yet
-//        stockClient.post()
-//                .uri("/notifications/reserve-stock")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(new StockPayload(order.getId(), order.getProductName(), order.getQuantity()))
-//                .retrieve()
-//                .toBodilessEntity();
+        stockClient.post()
+                .uri("/orders/reserve")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new StockPayload(order.getId(), order.getProductName(), order.getQuantity()))
+                .retrieve()
+                .toBodilessEntity();
     }
 
     public void notifyCancelReservation(Order order) {
-        // TODO: stock-service not implemented yet
-//        stockClient.post()
-//                .uri("/notifications/cancel-reservation")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(new OrderIdPayload(order.getId()))
-//                .retrieve()
-//                .toBodilessEntity();
+        stockClient.post()
+                .uri("/orders/{orderId}/cancel-reservation", order.getId())
+                .retrieve()
+                .toBodilessEntity();
     }
 
     public void notifyReturnPayment(Order order) {
@@ -59,13 +55,10 @@ public class IntegrationClient {
     }
 
     public void notifyShipOrder(Order order) {
-        // TODO: stock-service not implemented yet
-//        stockClient.post()
-//                .uri("/notifications/ship-order")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .body(new OrderIdPayload(order.getId()))
-//                .retrieve()
-//                .toBodilessEntity();
+        stockClient.post()
+                .uri("/orders/{orderId}/ship", order.getId())
+                .retrieve()
+                .toBodilessEntity();
     }
 
     private record OrderPayload(UUID orderId, String customerName, String productName, Integer quantity) {}

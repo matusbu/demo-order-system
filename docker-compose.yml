@@ -21,6 +21,7 @@ services:
       SPRING_DATASOURCE_USERNAME: order_user
       SPRING_DATASOURCE_PASSWORD: order_pass
       INTEGRATIONS_PAYMENT_SERVICE_URL: http://payment-service:8081
+      INTEGRATIONS_STOCK_SERVICE_URL: http://stock-service:8082
     depends_on:
       - postgres
 
@@ -29,6 +30,14 @@ services:
     container_name: payment-service
     ports:
       - "8081:8081"
+    environment:
+      INTEGRATIONS_ORDER_ENGINE_URL: http://order-engine:8080
+
+  stock-service:
+    build: ./stock-service
+    container_name: stock-service
+    ports:
+      - "8082:8082"
     environment:
       INTEGRATIONS_ORDER_ENGINE_URL: http://order-engine:8080
 

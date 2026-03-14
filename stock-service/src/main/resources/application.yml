@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: stock-service
+
+server:
+  port: 8082
+
+integrations:
+  order-engine:
+    url: http://localhost:8080
+
+simulation:
+  cancellation-delay-seconds: 2
