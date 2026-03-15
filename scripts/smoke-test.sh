@@ -112,4 +112,16 @@ STATUS=$(echo "$RESPONSE" | jq -r '.status')
 assert_status "$STATUS" "DELIVERED" "Final order status"
 echo ""
 
+# ── Step 11: List orders by customer ──────────────────────────────────────────
+echo "── Step 11: GET /orders?customerName=Alice → list orders for customer"
+RESPONSE=$(curl -sf "$ORDER_ENGINE/orders?customerName=Alice")
+echo "$RESPONSE" | jq .
+COUNT=$(echo "$RESPONSE" | jq 'length')
+if [ "$COUNT" -gt 0 ]; then
+  pass "GET /orders?customerName=Alice — returned $COUNT order(s)"
+else
+  fail "GET /orders?customerName=Alice — expected at least 1 order, got 0"
+fi
+echo ""
+
 echo "=== All steps passed ==="
