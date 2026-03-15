@@ -12,6 +12,8 @@ in the context of a realistic Java microservices application.
 demo-order-system/
 ├── order-engine/       # Handles order lifecycle: creation, validation, and state transitions.
 │                       # Persists orders to PostgreSQL. Contains the order state machine.
+│                       # Exposes a STOMP/WebSocket endpoint at /ws/orders (SockJS fallback)
+│                       # that pushes order status updates to /topic/orders/{customerName}.
 ├── payment-service/    # Handles payment processing requests from the order engine.
 │                       # Holds in-memory timeout state per order; no persistent storage.
 ├── stock-service/      # Gateway to the internal warehouse and shipping system.
