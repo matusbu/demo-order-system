@@ -120,6 +120,8 @@ public class OrderService {
             integrationClient.notifyShipOrder(order);
         } else if (newStatus == OrderStatus.RETURNING_PAYMENT) {
             integrationClient.notifyReturnPayment(order);
+        } else if (newStatus == OrderStatus.RELEASING_RESERVATION) {
+            integrationClient.notifyCancelReservation(order);
         }
 
         return order;
