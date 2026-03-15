@@ -11,6 +11,8 @@ import com.demo.orderengine.integration.IntegrationClient;
 import com.demo.orderengine.repository.OrderRepository;
 import com.demo.orderengine.statemachine.OrderStateMachine;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
     private final OrderRepository orderRepository;
     private final OrderStateMachine stateMachine;
@@ -68,7 +72,7 @@ public class OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
 
-        OrderStatus newStatus = stateMachine.transition(order.getStatus(), OrderEvent.USER_CANCELLED);
+        OrderStatus newStatus = applyTransition(order.getId(), order.getStatus(), OrderEvent.USER_CANCELLED);
         order.setStatus(newStatus);
         order.setUpdatedAt(LocalDateTime.now());
         order = orderRepository.save(order);
@@ -88,7 +92,7 @@ public class OrderService {
         Order order = orderRepository.findById(request.orderId())
                 .orElseThrow(() -> new OrderNotFoundException(request.orderId()));
 
-        OrderStatus newStatus = stateMachine.transition(order.getStatus(), request.event());
+        OrderStatus newStatus = applyTransition(order.getId(), order.getStatus(), request.event());
         order.setStatus(newStatus);
         order.setUpdatedAt(LocalDateTime.now());
         order = orderRepository.save(order);
@@ -106,7 +110,7 @@ public class OrderService {
         Order order = orderRepository.findById(request.orderId())
                 .orElseThrow(() -> new OrderNotFoundException(request.orderId()));
 
-        OrderStatus newStatus = stateMachine.transition(order.getStatus(), request.event());
+        OrderStatus newStatus = applyTransition(order.getId(), order.getStatus(), request.event());
         order.setStatus(newStatus);
         order.setUpdatedAt(LocalDateTime.now());
         order = orderRepository.save(order);
@@ -125,5 +129,17 @@ public class OrderService {
         String topic = topicPrefix + "/orders/" + order.getCustomerName();
         messagingTemplate.convertAndSend(topic,
                 new OrderStatusMessage(order.getId(), order.getStatus(), order.getUpdatedAt()));
+        log.debug("WebSocket message published for order {} on topic {} with status {}", order.getId(), topic, order.getStatus());
+    }
+
+    private OrderStatus applyTransition(UUID orderId, OrderStatus from, OrderEvent event) {
+        try {
+            OrderStatus to = stateMachine.transition(from, event);
+            log.info("Order {} transitioned {} --[{}]--> {}", orderId, from, event, to);
+            return to;
+        } catch (com.demo.orderengine.statemachine.IllegalStateTransitionException e) {
+            log.error("Invalid transition attempted for order {}: {} --[{}]--> not allowed", orderId, from, event);
+            throw e;
+        }
     }
 }
