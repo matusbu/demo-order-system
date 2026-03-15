@@ -41,5 +41,13 @@ services:
     environment:
       INTEGRATIONS_ORDER_ENGINE_URL: http://order-engine:8080
 
+  order-ui:
+    build: ./order-ui
+    container_name: order-ui
+    ports:
+      - "3000:80"
+    depends_on:
+      - order-engine
+
 volumes:
   postgres_data:

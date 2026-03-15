@@ -20,7 +20,11 @@ demo-order-system/
 │                       # Exposes simulation endpoints for manual triggering of warehouse
 │                       # and shipping outcomes. Holds in-memory reservation/shipment state;
 │                       # no persistent storage.
-├── docker-compose.yml  # Runs the PostgreSQL 16 instance used by order-engine.
+├── order-ui/           # React + TypeScript + Vite frontend. Three pages: Login,
+│                       # Shop (5 Apple products), and My Orders. Communicates with
+│                       # order-engine via REST (axios) and WebSocket (STOMP/SockJS).
+│                       # Served by nginx on port 3000; nginx proxies /api/* to order-engine.
+├── docker-compose.yml  # Runs PostgreSQL 16, all three services, and order-ui.
 ├── CLAUDE.md           # This file.
 └── README.md           # Project overview and startup instructions.
 ```
