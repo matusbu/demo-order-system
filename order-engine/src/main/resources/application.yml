@@ -23,3 +23,7 @@ integrations:
     url: http://localhost:8081
   stock-service:
     url: http://localhost:8082
+
+websocket:
+  endpoint: /ws/orders
+  topic-prefix: /topic

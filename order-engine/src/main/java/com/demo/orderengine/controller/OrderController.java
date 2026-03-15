@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -26,6 +27,11 @@ public class OrderController {
     @GetMapping("/{id}")
     public Order getOrder(@PathVariable UUID id) {
         return orderService.getOrder(id);
+    }
+
+    @GetMapping
+    public List<Order> getOrdersByCustomer(@RequestParam String customerName) {
+        return orderService.getOrdersByCustomer(customerName);
     }
 
     @DeleteMapping("/{id}/cancel")

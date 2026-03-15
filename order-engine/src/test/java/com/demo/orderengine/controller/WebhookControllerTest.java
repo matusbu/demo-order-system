@@ -3,9 +3,11 @@ package com.demo.orderengine.controller;
 import com.demo.orderengine.AbstractIntegrationTest;
 import com.demo.orderengine.domain.Order;
 import com.demo.orderengine.domain.OrderStatus;
+import com.demo.orderengine.dto.OrderStatusMessage;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -29,6 +31,9 @@ class WebhookControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status").value("RESERVED"));
 
         verify(integrationClient, never()).notifyShipOrder(any());
+        verify(messagingTemplate).convertAndSend(
+                eq("/topic/orders/Alice"),
+                argThatStatus(OrderStatus.RESERVED));
     }
 
     @Test
@@ -44,6 +49,9 @@ class WebhookControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status").value("READY_TO_SHIP"));
 
         verify(integrationClient).notifyShipOrder(any());
+        verify(messagingTemplate).convertAndSend(
+                eq("/topic/orders/Alice"),
+                argThatStatus(OrderStatus.READY_TO_SHIP));
     }
 
     @Test
@@ -57,6 +65,10 @@ class WebhookControllerTest extends AbstractIntegrationTest {
                                 """.formatted(order.getId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CANCELLED"));
+
+        verify(messagingTemplate).convertAndSend(
+                eq("/topic/orders/Alice"),
+                argThatStatus(OrderStatus.CANCELLED));
     }
 
     @Test
@@ -70,6 +82,10 @@ class WebhookControllerTest extends AbstractIntegrationTest {
                                 """.formatted(order.getId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CANCELLED"));
+
+        verify(messagingTemplate).convertAndSend(
+                eq("/topic/orders/Alice"),
+                argThatStatus(OrderStatus.CANCELLED));
     }
 
     @Test
@@ -83,6 +99,10 @@ class WebhookControllerTest extends AbstractIntegrationTest {
                                 """.formatted(order.getId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("DELIVERED"));
+
+        verify(messagingTemplate).convertAndSend(
+                eq("/topic/orders/Alice"),
+                argThatStatus(OrderStatus.DELIVERED));
     }
 
     @Test
@@ -120,6 +140,10 @@ class WebhookControllerTest extends AbstractIntegrationTest {
                                 """.formatted(order.getId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("PAID"));
+
+        verify(messagingTemplate).convertAndSend(
+                eq("/topic/orders/Alice"),
+                argThatStatus(OrderStatus.PAID));
     }
 
     @Test
@@ -135,6 +159,9 @@ class WebhookControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.status").value("READY_TO_SHIP"));
 
         verify(integrationClient).notifyShipOrder(any());
+        verify(messagingTemplate).convertAndSend(
+                eq("/topic/orders/Alice"),
+                argThatStatus(OrderStatus.READY_TO_SHIP));
     }
 
     @Test
@@ -148,6 +175,10 @@ class WebhookControllerTest extends AbstractIntegrationTest {
                                 """.formatted(order.getId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("RELEASING_RESERVATION"));
+
+        verify(messagingTemplate).convertAndSend(
+                eq("/topic/orders/Alice"),
+                argThatStatus(OrderStatus.RELEASING_RESERVATION));
     }
 
     @Test
@@ -161,6 +192,10 @@ class WebhookControllerTest extends AbstractIntegrationTest {
                                 """.formatted(order.getId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CANCELLED"));
+
+        verify(messagingTemplate).convertAndSend(
+                eq("/topic/orders/Alice"),
+                argThatStatus(OrderStatus.CANCELLED));
     }
 
     @Test
@@ -173,5 +208,12 @@ class WebhookControllerTest extends AbstractIntegrationTest {
                                 { "orderId": "%s", "event": "PAYMENT_RECEIVED" }
                                 """.formatted(order.getId())))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private static Object argThatStatus(OrderStatus expected) {
+        return org.mockito.ArgumentMatchers.argThat(
+                (Object obj) -> obj instanceof OrderStatusMessage m && m.status() == expected);
     }
 }

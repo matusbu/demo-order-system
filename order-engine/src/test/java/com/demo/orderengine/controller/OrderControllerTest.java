@@ -3,9 +3,13 @@ package com.demo.orderengine.controller;
 import com.demo.orderengine.AbstractIntegrationTest;
 import com.demo.orderengine.domain.Order;
 import com.demo.orderengine.domain.OrderStatus;
+import com.demo.orderengine.dto.OrderStatusMessage;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -36,6 +40,9 @@ class OrderControllerTest extends AbstractIntegrationTest {
 
         verify(integrationClient).notifyOrderCreated(any());
         verify(integrationClient).notifyReserveStock(any());
+        verify(messagingTemplate).convertAndSend(
+                eq("/topic/orders/Alice"),
+                argThatStatus(OrderStatus.CREATED));
     }
 
     @Test
@@ -66,6 +73,38 @@ class OrderControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    // ── GET /orders?customerName ───────────────────────────────────────────────
+
+    @Test
+    void getOrdersByCustomer_shouldReturnOrdersNewestFirst() throws Exception {
+        orderRepository.save(Order.builder()
+                .customerName("Alice").productName("Widget").quantity(1)
+                .status(OrderStatus.CREATED)
+                .createdAt(LocalDateTime.now().minusHours(1))
+                .updatedAt(LocalDateTime.now().minusHours(1))
+                .build());
+        Order newer = orderRepository.save(Order.builder()
+                .customerName("Alice").productName("Gadget").quantity(2)
+                .status(OrderStatus.PAID)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build());
+
+        mockMvc.perform(get("/orders").param("customerName", "Alice"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(newer.getId().toString()))
+                .andExpect(jsonPath("$[0].productName").value("Gadget"));
+    }
+
+    @Test
+    void getOrdersByCustomer_unknownCustomer_shouldReturnEmptyList() throws Exception {
+        mockMvc.perform(get("/orders").param("customerName", "Unknown"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
     // ── DELETE /orders/{id}/cancel ────────────────────────────────────────────
 
     @Test
@@ -78,6 +117,9 @@ class OrderControllerTest extends AbstractIntegrationTest {
 
         verify(integrationClient, never()).notifyCancelReservation(any());
         verify(integrationClient, never()).notifyReturnPayment(any());
+        verify(messagingTemplate).convertAndSend(
+                eq("/topic/orders/Alice"),
+                argThatStatus(OrderStatus.CANCELLED));
     }
 
     @Test
@@ -90,6 +132,9 @@ class OrderControllerTest extends AbstractIntegrationTest {
 
         verify(integrationClient).notifyCancelReservation(any());
         verify(integrationClient, never()).notifyReturnPayment(any());
+        verify(messagingTemplate).convertAndSend(
+                eq("/topic/orders/Alice"),
+                argThatStatus(OrderStatus.RELEASING_RESERVATION));
     }
 
     @Test
@@ -102,6 +147,9 @@ class OrderControllerTest extends AbstractIntegrationTest {
 
         verify(integrationClient).notifyReturnPayment(any());
         verify(integrationClient, never()).notifyCancelReservation(any());
+        verify(messagingTemplate).convertAndSend(
+                eq("/topic/orders/Alice"),
+                argThatStatus(OrderStatus.RETURNING_PAYMENT));
     }
 
     @Test
@@ -116,5 +164,12 @@ class OrderControllerTest extends AbstractIntegrationTest {
     void cancelOrder_unknownId_shouldReturn404() throws Exception {
         mockMvc.perform(delete("/orders/00000000-0000-0000-0000-000000000000/cancel"))
                 .andExpect(status().isNotFound());
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private static Object argThatStatus(OrderStatus expected) {
+        return org.mockito.ArgumentMatchers.argThat(
+                (Object obj) -> obj instanceof OrderStatusMessage m && m.status() == expected);
     }
 }

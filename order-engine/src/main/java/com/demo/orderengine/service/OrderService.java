@@ -4,16 +4,20 @@ import com.demo.orderengine.domain.Order;
 import com.demo.orderengine.domain.OrderEvent;
 import com.demo.orderengine.domain.OrderStatus;
 import com.demo.orderengine.dto.CreateOrderRequest;
+import com.demo.orderengine.dto.OrderStatusMessage;
 import com.demo.orderengine.dto.PaymentWebhookRequest;
 import com.demo.orderengine.dto.StockWebhookRequest;
 import com.demo.orderengine.integration.IntegrationClient;
 import com.demo.orderengine.repository.OrderRepository;
 import com.demo.orderengine.statemachine.OrderStateMachine;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -23,6 +27,10 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderStateMachine stateMachine;
     private final IntegrationClient integrationClient;
+    private final SimpMessagingTemplate messagingTemplate;
+
+    @Value("${websocket.topic-prefix}")
+    private String topicPrefix;
 
     @Transactional
     public Order createOrder(CreateOrderRequest request) {
@@ -36,6 +44,7 @@ public class OrderService {
                 .build();
 
         order = orderRepository.save(order);
+        publishStatusUpdate(order);
 
         integrationClient.notifyOrderCreated(order);
         integrationClient.notifyReserveStock(order);
@@ -49,6 +58,11 @@ public class OrderService {
                 .orElseThrow(() -> new OrderNotFoundException(id));
     }
 
+    @Transactional(readOnly = true)
+    public List<Order> getOrdersByCustomer(String customerName) {
+        return orderRepository.findByCustomerNameOrderByCreatedAtDesc(customerName);
+    }
+
     @Transactional
     public Order cancelOrder(UUID id) {
         Order order = orderRepository.findById(id)
@@ -58,6 +72,7 @@ public class OrderService {
         order.setStatus(newStatus);
         order.setUpdatedAt(LocalDateTime.now());
         order = orderRepository.save(order);
+        publishStatusUpdate(order);
 
         if (newStatus == OrderStatus.RELEASING_RESERVATION) {
             integrationClient.notifyCancelReservation(order);
@@ -77,6 +92,7 @@ public class OrderService {
         order.setStatus(newStatus);
         order.setUpdatedAt(LocalDateTime.now());
         order = orderRepository.save(order);
+        publishStatusUpdate(order);
 
         if (newStatus == OrderStatus.READY_TO_SHIP) {
             integrationClient.notifyShipOrder(order);
@@ -94,6 +110,7 @@ public class OrderService {
         order.setStatus(newStatus);
         order.setUpdatedAt(LocalDateTime.now());
         order = orderRepository.save(order);
+        publishStatusUpdate(order);
 
         if (newStatus == OrderStatus.READY_TO_SHIP) {
             integrationClient.notifyShipOrder(order);
@@ -102,5 +119,11 @@ public class OrderService {
         }
 
         return order;
+    }
+
+    private void publishStatusUpdate(Order order) {
+        String topic = topicPrefix + "/orders/" + order.getCustomerName();
+        messagingTemplate.convertAndSend(topic,
+                new OrderStatusMessage(order.getId(), order.getStatus(), order.getUpdatedAt()));
     }
 }

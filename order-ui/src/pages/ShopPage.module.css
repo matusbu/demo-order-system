@@ -1,0 +1,141 @@
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.heading {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 28px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px 20px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.11);
+  transform: translateY(-2px);
+}
+
+.icon {
+  font-size: 2.8rem;
+  line-height: 1;
+}
+
+.productName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.quantityRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.qtyBtn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  line-height: 1;
+}
+
+.qtyBtn:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.qtyBtn:disabled {
+  color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.qtyValue {
+  font-size: 1rem;
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+  color: #111827;
+}
+
+.buyBtn {
+  width: 100%;
+  padding: 10px;
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 6px;
+}
+
+.buyBtn:hover:not(:disabled) {
+  background: #1f2937;
+}
+
+.buyBtn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.notificationOk,
+.notificationErr {
+  position: fixed;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  z-index: 200;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  white-space: nowrap;
+}
+
+.notificationOk {
+  background: #166534;
+  color: #fff;
+}
+
+.notificationErr {
+  background: #b91c1c;
+  color: #fff;
+}

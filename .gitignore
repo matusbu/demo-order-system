@@ -27,5 +27,4 @@ replay_pid*
 .idea/
 
 # Build output
-order-engine/target/
-payment-service/target/
+**/target/
