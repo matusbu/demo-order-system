@@ -41,4 +41,4 @@ demo-order-system/
 
 ## Notes
 
-- For the complete order state machine and all valid transitions, see [`docs/state-machine.md`](docs/state-machine.md).
+- For the complete order state machine and all valid transitions, see [`state-machine.md`](state-machine.md).
