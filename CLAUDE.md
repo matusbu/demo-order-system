@@ -39,6 +39,17 @@ demo-order-system/
 | Database    | PostgreSQL 16               |
 | Runtime     | Docker / Docker Compose     |
 
+## Testing
+
+Four test levels are implemented. See [`TEST_STRATEGY.md`](TEST_STRATEGY.md) for the full strategy.
+
+| Level | Tag | Scope | Run |
+|---|---|---|---|
+| Unit | `unit` | Isolated classes, no Spring context | `mvn test -Dgroups=unit` |
+| Integration | `integration` | Full Spring context per service; real PostgreSQL (TestContainers); HTTP peers mocked with `@MockitoBean` | `mvn test -Dgroups=integration` |
+| E2E | `e2e` | All services in Docker via `DockerComposeContainer`; actor DSL (`Client`, `PaymentSystem`, `WarehouseSystem`) | `mvn test -Dgroups=e2e -pl order-engine` |
+| GUI *(planned)* | — | nginx proxy + WebSocket via Playwright | `cd order-ui && npx playwright test` |
+
 ## Notes
 
 - For the complete order state machine and all valid transitions, see [`state-machine.md`](state-machine.md).

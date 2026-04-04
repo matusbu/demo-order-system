@@ -54,15 +54,24 @@ docker-compose down
 
 ## Testing
 
-### Layer 1 — Unit Tests
-- **What they test:** Individual classes and methods in isolation — no Spring context, no database, no network. Example: `OrderStateMachine` transition logic.
-- **Tools:** JUnit 5, AssertJ
-- **Run:**
-  ```bash
-  cd order-engine && mvn test -Dgroups=unit
-  ```
+The project has four test levels. See [`TEST_STRATEGY.md`](TEST_STRATEGY.md) for the full strategy, design decisions, and infrastructure details.
 
-### Run all tests
-```bash
-mvn test
-```
+### Layer 1 — Unit Tests
+- **Scope:** Individual classes in isolation — no Spring context, no database, no network.
+- **Tools:** JUnit 5, Mockito, AssertJ
+- **Run:** `mvn test -Dgroups=unit`
+
+### Layer 2 — Integration Tests
+- **Scope:** Each service with its full Spring context. External HTTP peers are replaced with `@MockitoBean`. PostgreSQL runs in a TestContainers container for order-engine.
+- **Tools:** Spring Boot Test, TestContainers, Mockito
+- **Run:** `mvn test -Dgroups=integration`
+
+### Layer 3 — API-level E2E Tests
+- **Scope:** All three services running as real Docker containers. No mocking — real HTTP between services. Tests are written using three actors (`Client`, `PaymentSystem`, `WarehouseSystem`) that expose a business-readable DSL.
+- **Tools:** TestContainers `DockerComposeContainer`, RestAssured, Awaitility
+- **Run:** `mvn test -Dgroups=e2e -pl order-engine` *(requires Docker; builds images on first run)*
+
+### Layer 4 — Playwright GUI Tests *(planned)*
+- **Scope:** nginx proxy correctness and WebSocket live updates via a real browser.
+- **Tools:** Playwright
+- **Run:** `cd order-ui && npx playwright test`
