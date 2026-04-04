@@ -70,4 +70,10 @@ public class PaymentTimeoutService {
         cancel(orderId);
         orderEngineClient.sendPaymentEvent(orderId, PaymentEvent.PAYMENT_RECEIVED);
     }
+
+    public void simulateTimeout(UUID orderId) {
+        cancel(orderId);
+        log.info("Payment timeout simulated for order {}, notifying order-engine", orderId);
+        orderEngineClient.sendPaymentEvent(orderId, PaymentEvent.PAYMENT_TIMEOUT);
+    }
 }

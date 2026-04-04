@@ -37,4 +37,9 @@ public class PaymentController {
     public void simulatePayment(@Valid @RequestBody SimulatePaymentRequest request) {
         paymentTimeoutService.processPayment(request.orderId(), request.amount());
     }
+
+    @PostMapping("/simulate/payment-timeout")
+    public void simulatePaymentTimeout(@Valid @RequestBody RegisterOrderRequest request) {
+        paymentTimeoutService.simulateTimeout(request.orderId());
+    }
 }
