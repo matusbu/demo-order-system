@@ -62,26 +62,7 @@ docker-compose down
   cd order-engine && mvn test -Dgroups=unit
   ```
 
-### Layer 2 — Integration Tests
-- **What they test:** The full Spring application context (controllers → service → repository) against a real PostgreSQL database. No real HTTP server is started — `@SpringBootTest(webEnvironment = MOCK)` is used so requests are dispatched in-process via MockMvc (no TCP, no Tomcat). External HTTP calls to payment-service and stock-service are mocked with Mockito.
-- **Tools:** JUnit 5, `@SpringBootTest(webEnvironment = MOCK)`, MockMvc, Testcontainers (PostgreSQL), Mockito
-- **Requirement:** Docker must be running (Testcontainers starts the DB automatically)
-- **Run:**
-  ```bash
-  cd order-engine && mvn test -Dgroups=integration
-  ```
-
 ### Run all tests
 ```bash
-cd order-engine && mvn test
+mvn test
 ```
-
-### Layer 3 — E2E Tests
-- **What they test:** Full business workflows end-to-end — all services running, communicating over real HTTP. Validates complete order lifecycle flows across service boundaries.
-- **Tools:** To be defined (candidates: REST Assured, Karate)
-- **Requirement:** All services and the database must be running
-- **Status:** Not yet implemented — planned for a future phase
-- **Run:**
-  ```bash
-  docker-compose up -d --build
-  ```
