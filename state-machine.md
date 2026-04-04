@@ -7,6 +7,7 @@
 | CREATED                | STOCK_RESERVED         | RESERVED               |
 | CREATED                | STOCK_SOLD_OUT         | CANCELLED              |
 | CREATED                | PAYMENT_RECEIVED       | PAID                   |
+| CREATED                | PAYMENT_TIMEOUT        | CANCELLED              |
 | CREATED                | USER_CANCELLED         | CANCELLED              |
 | RESERVED               | PAYMENT_RECEIVED       | READY_TO_SHIP          |
 | RESERVED               | PAYMENT_TIMEOUT        | RELEASING_RESERVATION  |

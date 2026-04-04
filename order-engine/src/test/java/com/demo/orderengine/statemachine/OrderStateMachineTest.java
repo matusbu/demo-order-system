@@ -28,6 +28,7 @@ class OrderStateMachineTest {
                 Arguments.of(OrderStatus.CREATED,               OrderEvent.STOCK_RESERVED,        OrderStatus.RESERVED),
                 Arguments.of(OrderStatus.CREATED,               OrderEvent.STOCK_SOLD_OUT,         OrderStatus.CANCELLED),
                 Arguments.of(OrderStatus.CREATED,               OrderEvent.PAYMENT_RECEIVED,       OrderStatus.PAID),
+                Arguments.of(OrderStatus.CREATED,               OrderEvent.PAYMENT_TIMEOUT,        OrderStatus.CANCELLED),
                 Arguments.of(OrderStatus.CREATED,               OrderEvent.USER_CANCELLED,         OrderStatus.CANCELLED),
                 Arguments.of(OrderStatus.RESERVED,              OrderEvent.PAYMENT_RECEIVED,       OrderStatus.READY_TO_SHIP),
                 Arguments.of(OrderStatus.RESERVED,              OrderEvent.PAYMENT_TIMEOUT,        OrderStatus.RELEASING_RESERVATION),
@@ -57,7 +58,6 @@ class OrderStateMachineTest {
                 Arguments.of(OrderStatus.CANCELLED,             OrderEvent.USER_CANCELLED),
                 Arguments.of(OrderStatus.CANCELLED,             OrderEvent.PAYMENT_RETURNED),
                 // Events not valid for a given state
-                Arguments.of(OrderStatus.CREATED,               OrderEvent.PAYMENT_TIMEOUT),
                 Arguments.of(OrderStatus.CREATED,               OrderEvent.DELIVERY_CONFIRMED),
                 Arguments.of(OrderStatus.RESERVED,              OrderEvent.STOCK_SOLD_OUT),
                 Arguments.of(OrderStatus.RESERVED,              OrderEvent.DELIVERY_CONFIRMED),

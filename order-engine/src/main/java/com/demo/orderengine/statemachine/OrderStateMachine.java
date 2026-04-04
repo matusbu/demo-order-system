@@ -19,6 +19,7 @@ public class OrderStateMachine {
                 OrderEvent.STOCK_RESERVED,          OrderStatus.RESERVED,
                 OrderEvent.STOCK_SOLD_OUT,          OrderStatus.CANCELLED,
                 OrderEvent.PAYMENT_RECEIVED,        OrderStatus.PAID,
+                OrderEvent.PAYMENT_TIMEOUT,         OrderStatus.CANCELLED,
                 OrderEvent.USER_CANCELLED,          OrderStatus.CANCELLED
         ));
 
