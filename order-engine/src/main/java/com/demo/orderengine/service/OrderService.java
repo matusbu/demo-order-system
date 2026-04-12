@@ -100,6 +100,8 @@ public class OrderService {
 
         if (newStatus == OrderStatus.READY_TO_SHIP) {
             integrationClient.notifyShipOrder(order);
+        } else if (newStatus == OrderStatus.RETURNING_PAYMENT) {
+            integrationClient.notifyReturnPayment(order);
         }
 
         return order;
