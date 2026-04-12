@@ -77,6 +77,14 @@ class PaymentControllerTest {
     }
 
     @Test
+    void registerOrder_missingOrderId_returns400() throws Exception {
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void cancelOrder_returns200AndDelegatestoService() throws Exception {
         UUID orderId = UUID.randomUUID();
 
