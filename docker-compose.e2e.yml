@@ -14,7 +14,7 @@ services:
   order-engine:
     build: ./order-engine
     ports:
-      - "8080:8080"
+      - "8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_db
       SPRING_DATASOURCE_USERNAME: order_user
@@ -28,14 +28,14 @@ services:
   payment-service:
     build: ./payment-service
     ports:
-      - "8081:8081"
+      - "8081"
     environment:
       INTEGRATIONS_ORDER_ENGINE_URL: http://order-engine:8080
 
   stock-service:
     build: ./stock-service
     ports:
-      - "8082:8082"
+      - "8082"
     environment:
       INTEGRATIONS_ORDER_ENGINE_URL: http://order-engine:8080
       SIMULATION_CANCELLATION_DELAY_SECONDS: "1"
