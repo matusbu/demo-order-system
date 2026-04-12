@@ -95,7 +95,7 @@ Integration tests are written for `order-engine` only. `payment-service` and `st
 - Happy path (payment first): `CREATED → PAID → READY_TO_SHIP → SHIPPING → DELIVERED`
 - Compensation — releasing reservation: `RESERVED → RELEASING_RESERVATION → CANCELLED`
 - Compensation — returning payment: `PAID → RETURNING_PAYMENT → CANCELLED`
-- Early cancellation: `CREATED → CANCELLED` (stock sold out or immediate user cancel)
+- Early cancellation: `CREATED → CANCELLED` (immediate user cancel)
 - WebSocket frame sequence — STOMP frames arrive in the correct status order for each flow
 
 ### Excludes
@@ -104,19 +104,26 @@ Integration tests are written for `order-engine` only. `payment-service` and `st
 - Frontend UI interaction — covered at Level 4
 - Failure recovery and resilience scenarios (out of scope for this educational project)
 
+### Design
+
+Tests use an **actor pattern**: each actor (`Customer`, `Warehouse`, `PaymentSystem`) represents a persona or third-party system and exposes business-named methods. Tests read like a paragraph — every action is immediately followed by the WebSocket assertion it produces.
+
 ### Tooling
 | Tool | Role |
 |---|---|
 | JUnit 5 | Test runner |
-| RestAssured | Fluent HTTP client for driving REST calls |
-| `WebSocketStompClient` + `SockJsClient` | STOMP subscriber (same stack as the real UI) |
-| Awaitility | Polls `GET /orders/{id}` until expected status is reached; avoids `Thread.sleep` |
-| Testcontainers `DockerComposeContainer` | Manages the full stack lifecycle from Java |
+| RestAssured | Fluent HTTP client for driving REST calls in actors |
+| `WebSocketStompClient` + `SockJsClient` | STOMP subscriber in `Customer` actor (same stack as the real UI) |
+| `LinkedBlockingQueue` | Collects incoming STOMP frames; `poll(20 s)` provides the wait without `Thread.sleep` |
+| Testcontainers `ComposeContainer` | Manages the full stack lifecycle from Java |
 
-**Run gate:** Tagged `@Tag("e2e")`. Excluded from `mvn test`. Run via a dedicated Maven profile `-Pe2e` or a separate `e2e-tests/` module.
+**Module:** Standalone Maven module `e2e-tests/`, activated via `-Pe2e` profile. Run with:
+```
+mvn verify -Pe2e -pl e2e-tests
+```
 
 ### Target count
-6–10 tests — one per business flow listed above.
+5 tests — one per business flow listed above.
 
 ---
 
@@ -164,5 +171,5 @@ New devDependencies to add to `order-ui/package.json`:
 |---|---|---|---|
 | 1 — Unit | `@Tag("unit")` | `mvn test` (Surefire) | Every commit |
 | 2 — Integration | `@Tag("integration")`, `*IT.java` | `mvn verify` (Failsafe) | Every PR |
-| 3 — E2E | `@Tag("e2e")` | `mvn verify -Pe2e` | Pre-merge gate or nightly |
+| 3 — E2E | `@Tag("e2e")`, `*E2E.java` | `mvn verify -Pe2e -pl e2e-tests` (Failsafe) | Pre-merge gate or nightly |
 | 4 — Frontend | — | `npm run test` (Vitest) | Every commit |

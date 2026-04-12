@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: order_user
+      POSTGRES_PASSWORD: order_pass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U order_user -d order_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  order-engine:
+    build:
+      context: ../order-engine
+      dockerfile_inline: |
+        FROM eclipse-temurin:17-jre
+        WORKDIR /app
+        COPY target/*.jar app.jar
+        ENTRYPOINT ["java", "-jar", "app.jar"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_db
+      SPRING_DATASOURCE_USERNAME: order_user
+      SPRING_DATASOURCE_PASSWORD: order_pass
+      INTEGRATIONS_PAYMENT_SERVICE_URL: http://payment-service:8081
+      INTEGRATIONS_STOCK_SERVICE_URL: http://stock-service:8082
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  payment-service:
+    build:
+      context: ../payment-service
+      dockerfile_inline: |
+        FROM eclipse-temurin:17-jre
+        WORKDIR /app
+        COPY target/*.jar app.jar
+        ENTRYPOINT ["java", "-jar", "app.jar"]
+    environment:
+      INTEGRATIONS_ORDER_ENGINE_URL: http://order-engine:8080
+
+  stock-service:
+    build:
+      context: ../stock-service
+      dockerfile_inline: |
+        FROM eclipse-temurin:17-jre
+        WORKDIR /app
+        COPY target/*.jar app.jar
+        ENTRYPOINT ["java", "-jar", "app.jar"]
+    environment:
+      INTEGRATIONS_ORDER_ENGINE_URL: http://order-engine:8080
