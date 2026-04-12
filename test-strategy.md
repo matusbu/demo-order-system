@@ -29,11 +29,11 @@ Level 4 — Frontend      React components in isolation, no running backend.
 **Purpose:** Verify isolated logic. All I/O and framework infrastructure replaced by mocks.
 
 ### Covers
-- `OrderStateMachine` — all valid and invalid transitions (already implemented)
-- `OrderService` — every method's branching logic and downstream delegation (highest-priority gap)
+- `OrderStateMachine` — all valid and invalid transitions
+- `OrderService` — every method's branching logic and downstream delegation
 - `OrderController` + `WebhookController` — HTTP routing, request validation, response shapes via `@WebMvcTest`
-- `PaymentTimeoutService` + `PaymentController` — timeout scheduling, cancellation, simulation endpoints (mostly implemented)
-- `StockService` + `SimulateController` — reservation/shipment scheduling, simulation endpoints (mostly implemented)
+- `PaymentTimeoutService` + `PaymentController` — timeout scheduling, cancellation, simulation endpoints
+- `StockService` + `StockController` + `SimulateController` — reservation/shipment scheduling, simulation endpoints
 - `GlobalExceptionHandler` — ProblemDetail response shapes for `OrderNotFoundException`, `IllegalStateTransitionException`, and `@Valid` failures
 
 ### Excludes
@@ -49,11 +49,6 @@ Level 4 — Frontend      React components in isolation, no running backend.
 | Mockito (`@ExtendWith(MockitoExtension.class)`) | Mocking for pure service tests |
 | `@WebMvcTest` + `MockMvc` | Controller-layer tests (HTTP routing, validation, serialisation) |
 | AssertJ | Fluent assertions |
-
-All tools are already on the classpath via `spring-boot-starter-test`. No new dependencies required.
-
-### Target count
-40–60 tests across the monorepo.
 
 ---
 
