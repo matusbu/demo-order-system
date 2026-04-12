@@ -78,13 +78,8 @@ Integration tests are written for `order-engine` only. `payment-service` and `st
 | Testcontainers `PostgreSQLContainer` + `@ServiceConnection` | Real PostgreSQL instance; datasource wired automatically |
 | WireMock (`wiremock-spring-boot`) | Stubs for `payment-service` and `stock-service` HTTP endpoints |
 | `TestRestTemplate` | HTTP client for driving requests in tests |
-| Awaitility | Polling assertions where needed |
 
 **Requires Docker** — Testcontainers starts a real PostgreSQL container at test runtime.
-
-New test-scope dependencies to add to `order-engine/pom.xml`:
-- `org.testcontainers:postgresql`
-- `org.wiremock.integrations:wiremock-spring-boot`
 
 ### Target count
 15–25 tests.
