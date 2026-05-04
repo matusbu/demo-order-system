@@ -11,10 +11,6 @@ import net.serenitybdd.screenplay.ensure.Ensure;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
-
-import static org.awaitility.Awaitility.await;
-
 class OrderFlowE2E extends E2EBase {
 
     private Actor alice;
@@ -23,9 +19,9 @@ class OrderFlowE2E extends E2EBase {
 
     @BeforeEach
     void setUpActors() {
-        alice         = Customer.named("Alice",         "http://localhost:" + orderEnginePort);
-        warehouse     = Warehouse.named("Warehouse",    "http://localhost:" + stockServicePort);
-        paymentSystem = PaymentSystem.named("PaymentSystem", "http://localhost:" + paymentServicePort);
+        alice         = Customer.named("Alice",             "http://localhost:" + orderEnginePort);
+        warehouse     = Warehouse.named("Warehouse",        "http://localhost:" + stockServicePort);
+        paymentSystem = PaymentSystem.named("PaymentSystem","http://localhost:" + paymentServicePort);
     }
 
     @Test
@@ -38,9 +34,7 @@ class OrderFlowE2E extends E2EBase {
         warehouse.attemptsTo(SimulateShipped.forOrder(orderId));
         warehouse.attemptsTo(SimulateDeliveryConfirmed.forOrder(orderId));
 
-        await().atMost(Duration.ofSeconds(5)).untilAsserted(() ->
-                alice.attemptsTo(Ensure.that(TheOrderStatus.forOrderWithId(orderId)).isEqualTo("DELIVERED"))
-        );
+        alice.attemptsTo(WaitUntil.the(TheOrderStatus.forOrderWithId(orderId)).isEqualTo("DELIVERED"));
     }
 
     @Test
@@ -60,8 +54,6 @@ class OrderFlowE2E extends E2EBase {
 
         warehouse.attemptsTo(SimulateStockSoldOut.forOrder(orderId));
 
-        await().atMost(Duration.ofSeconds(5)).untilAsserted(() ->
-                alice.attemptsTo(Ensure.that(TheOrderStatus.forOrderWithId(orderId)).isEqualTo("CANCELLED"))
-        );
+        alice.attemptsTo(WaitUntil.the(TheOrderStatus.forOrderWithId(orderId)).isEqualTo("CANCELLED"));
     }
 }
