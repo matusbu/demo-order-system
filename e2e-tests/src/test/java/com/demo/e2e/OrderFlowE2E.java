@@ -1,13 +1,11 @@
 package com.demo.e2e;
 
-import com.demo.e2e.actor.Customer;
-import com.demo.e2e.actor.PaymentSystem;
-import com.demo.e2e.actor.Warehouse;
 import com.demo.e2e.questions.TheOrderStatus;
 import com.demo.e2e.support.E2EBase;
 import com.demo.e2e.tasks.*;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.ensure.Ensure;
+import net.serenitybdd.screenplay.rest.abilities.CallAnApi;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,9 +17,12 @@ class OrderFlowE2E extends E2EBase {
 
     @BeforeEach
     void setUpActors() {
-        alice         = Customer.named("Alice",             "http://localhost:" + orderEnginePort);
-        warehouse     = Warehouse.named("Warehouse",        "http://localhost:" + stockServicePort);
-        paymentSystem = PaymentSystem.named("PaymentSystem","http://localhost:" + paymentServicePort);
+        alice = Actor.named("Alice")
+                .whoCan(CallAnApi.at("http://localhost:" + orderEnginePort));
+        warehouse = Actor.named("Warehouse")
+                .whoCan(CallAnApi.at("http://localhost:" + stockServicePort));
+        paymentSystem = Actor.named("PaymentSystem")
+                .whoCan(CallAnApi.at("http://localhost:" + paymentServicePort));
     }
 
     @Test
