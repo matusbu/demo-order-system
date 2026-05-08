@@ -40,6 +40,7 @@ public class OrderService {
     public Order createOrder(CreateOrderRequest request) {
         Order order = Order.builder()
                 .customerName(request.customerName())
+                .customerEmail(request.customerEmail())
                 .productName(request.productName())
                 .quantity(request.quantity())
                 .status(OrderStatus.CREATED)
