@@ -54,10 +54,11 @@ docker-compose down
 
 ## Testing
 
-### Unit Tests
-- **What they test:** Individual classes and methods in isolation — no Spring context, no database, no network. Example: `OrderStateMachine` transition logic.
-- **Tools:** JUnit 5, AssertJ, Mockito
-- **Run:**
-  ```bash
-  mvn test -Dgroups=unit
-  ```
+See [`test-strategy.md`](test-strategy.md) for full scope, tooling, and design decisions.
+
+| Level | What | Run command |
+|-------|------|-------------|
+| 1 — Unit | Isolated logic, no I/O | `mvn test -Dgroups=unit` |
+| 2 — Integration | `order-engine` + real Postgres + WireMock (requires Docker) | `mvn verify -Dgroups=integration -pl order-engine` |
+| 3 — E2E | Full Docker Compose stack incl. WebSocket (requires Docker) | `mvn verify -Pe2e -pl e2e-tests` |
+| 4 — Frontend | React components in isolation | `cd order-ui && npm run test` |
