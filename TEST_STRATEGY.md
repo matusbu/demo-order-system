@@ -91,12 +91,9 @@ Integration tests are written for `order-engine` only. `payment-service` and `st
 **Purpose:** Verify complete business flows through the live Docker Compose stack — from the first REST call to the final persisted status, including WebSocket push notifications.
 
 ### Covers
-- Happy path (stock first): `CREATED → RESERVED → READY_TO_SHIP → SHIPPING → DELIVERED`
-- Happy path (payment first): `CREATED → PAID → READY_TO_SHIP → SHIPPING → DELIVERED`
-- Compensation — releasing reservation: `RESERVED → RELEASING_RESERVATION → CANCELLED`
-- Compensation — returning payment: `PAID → RETURNING_PAYMENT → CANCELLED`
-- Early cancellation: `CREATED → CANCELLED` (immediate user cancel)
-- WebSocket frame sequence — STOMP frames arrive in the correct status order for each flow
+- Complete business flows through the live Docker Compose stack — any path from order
+  creation to a terminal state (`DELIVERED` or `CANCELLED`)
+- WebSocket STOMP frame delivery — frames arrive in the correct status order for each flow
 
 ### Excludes
 - State-machine edge cases — all 15 valid and invalid transitions are exhaustively covered at Level 1
@@ -121,9 +118,6 @@ Tests use an **actor pattern**: each actor (`Customer`, `Warehouse`, `PaymentSys
 ```
 mvn verify -Pe2e -pl e2e-tests
 ```
-
-### Target count
-5 tests — one per business flow listed above.
 
 ---
 
