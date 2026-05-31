@@ -30,7 +30,7 @@ Determine the appropriate git command and execute it to get the diff.
 Look for the test strategy definition to understand what needs to be tested.
 
 **Strategy location:**
-- First, check if `strategy.md` exists in the repository root
+- First, check if `TEST_STRATEGY.md` exists in the repository root
 - If not found, check `.claude/` directory for strategy documentation
 - If user mentioned a specific strategy in their prompt, use that instead
 - If no strategy file found, ask the user where the test strategy is defined

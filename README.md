@@ -54,7 +54,7 @@ docker-compose down
 
 ## Testing
 
-See [`test-strategy.md`](test-strategy.md) for full scope, tooling, and design decisions.
+See [`TEST_STRATEGY.md`](TEST_STRATEGY.md) for full scope, tooling, and design decisions.
 
 | Level | What | Run command |
 |-------|------|-------------|
