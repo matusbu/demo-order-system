@@ -37,26 +37,22 @@ Look for the test strategy definition to understand the expected design and leve
 
 ## Step 3: Review test design quality
 
-Read the strategy file and identify all defined test levels. For each level, check whether a `### Design` section exists with real content (not placeholder text in square brackets). Then apply the following checks to the test changes from Step 1:
+Read the strategy file and identify all defined test levels. For each level, check whether a `### Design` section exists with real content (not placeholder text in square brackets). Only evaluate levels that have test file changes present in the diff from Step 1 — levels with no changes are out of scope, do not report on them.
 
-**Test level placement — apply to all levels**
-- Are modified or added tests placed at the correct level as defined in the strategy?
-- Are there tests that implement logic belonging to a different level?
+**Test level conformance**
+- Using `### Purpose`, `### Covers`, and `### Excludes` as the definition of what belongs at this level, evaluate whether each new or modified test belongs here based on what it does and how it is written
+- Flag tests whose nature or granularity contradicts the level's intent — e.g. a single field validation in an E2E test, or a full flow assertion in a unit test
 
-**Framework architecture conformance — apply only to levels with a defined `### Design` section**
-- Identify the architectural pattern described in the `### Design` section for this level (e.g. Screenplay pattern, Page Object Model, custom actor/DSL approach)
-- Check whether new or modified tests follow that pattern — are the correct abstractions used?
+**Framework architecture conformance** — apply only to levels with a defined `### Design` section
+- Identify the architectural pattern described in the `### Design` section (e.g. Screenplay pattern, Page Object Model, custom actor/DSL approach)
+- Check whether new or modified tests follow that pattern — are the correct abstractions used and is the defined pattern respected throughout?
 - Flag any tests that bypass the defined pattern and interact with the system at a lower level than intended
-
-**Scenario conformance — apply only to levels with a defined `### Design` section**
-- Do new or modified tests correspond to scenarios or flows listed under `### Covers` for this level?
-- Are there tests covering scenarios not present in `### Covers` — either misplaced or candidates for a strategy update?
 
 ## Step 4: Report results
 
 Provide a structured summary:
 - **Scope analyzed**: what test changes were reviewed
-- **Levels detected in strategy**: list levels found, noting which have a `### Design` section
+- **Levels reviewed**: only levels that had changes in the diff
 - **Well-designed**: tests that correctly follow the strategy
 - **Design issues found**: specific tests with placement or design problems, with explanation of why
-- **Recommendations**: concrete suggestions for each issue (e.g. move to unit level, refactor to use correct actor abstraction, update strategy `### Covers` if the scenario is valid)
+- **Recommendations**: concrete suggestions for each issue (e.g. move to unit level, refactor to use correct actor abstraction)

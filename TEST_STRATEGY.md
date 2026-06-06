@@ -102,8 +102,8 @@ Integration tests are written for `order-engine` only. `payment-service` and `st
 - Failure recovery and resilience scenarios (out of scope for this educational project)
 
 ### Design
-
-Tests use an **actor pattern**: each actor (`Customer`, `Warehouse`, `PaymentSystem`) represents a persona or third-party system and exposes business-named methods. Tests read like a paragraph — every action is immediately followed by the WebSocket assertion it produces.
+- Tests use an **actor pattern**: each actor (`Customer`, `Warehouse`, `PaymentSystem`) represents a persona or third-party system and exposes business-named methods. 
+- Tests read like a paragraph — every action is immediately followed by the WebSocket assertion it produces.
 
 ### Tooling
 | Tool | Role |
