@@ -1,7 +1,6 @@
 services:
   postgres:
     image: postgres:16
-    container_name: order-db
     environment:
       POSTGRES_DB: order_db
       POSTGRES_USER: order_user
@@ -12,8 +11,9 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   order-engine:
-    build: ./order-engine
-    container_name: order-engine
+    build:
+      context: .
+      dockerfile: order-engine/Dockerfile
     ports:
       - "8080:8080"
     environment:
@@ -26,16 +26,18 @@ services:
       - postgres
 
   payment-service:
-    build: ./payment-service
-    container_name: payment-service
+    build:
+      context: .
+      dockerfile: payment-service/Dockerfile
     ports:
       - "8081:8081"
     environment:
       INTEGRATIONS_ORDER_ENGINE_URL: http://order-engine:8080
 
   stock-service:
-    build: ./stock-service
-    container_name: stock-service
+    build:
+      context: .
+      dockerfile: stock-service/Dockerfile
     ports:
       - "8082:8082"
     environment:
@@ -43,7 +45,6 @@ services:
 
   order-ui:
     build: ./order-ui
-    container_name: order-ui
     ports:
       - "3000:80"
     depends_on:
