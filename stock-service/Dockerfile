@@ -2,6 +2,7 @@
 FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY pom.xml .
+COPY proto proto
 COPY stock-service/pom.xml stock-service/pom.xml
 WORKDIR /app/stock-service
 RUN mvn dependency:go-offline -q

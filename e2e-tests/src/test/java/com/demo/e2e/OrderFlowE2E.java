@@ -1,5 +1,6 @@
 package com.demo.e2e;
 
+import com.demo.e2e.abilities.CallStockServiceGrpc;
 import com.demo.e2e.questions.TheOrderStatus;
 import com.demo.e2e.support.E2EBase;
 import com.demo.e2e.tasks.*;
@@ -20,7 +21,7 @@ class OrderFlowE2E extends E2EBase {
         alice = Actor.named("Alice")
                 .whoCan(CallAnApi.at("http://localhost:" + orderEnginePort));
         warehouse = Actor.named("Warehouse")
-                .whoCan(CallAnApi.at("http://localhost:" + stockServicePort));
+                .whoCan(CallStockServiceGrpc.at("localhost", stockServiceGrpcPort));
         paymentSystem = Actor.named("PaymentSystem")
                 .whoCan(CallAnApi.at("http://localhost:" + paymentServicePort));
     }

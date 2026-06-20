@@ -1,6 +1,10 @@
 package com.demo.orderengine.integration;
 
 import com.demo.orderengine.domain.Order;
+import com.demo.stockservice.grpc.OrderIdRequest;
+import com.demo.stockservice.grpc.ReserveRequest;
+import com.demo.stockservice.grpc.StockServiceGrpc;
+import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -10,21 +14,21 @@ import org.springframework.web.client.RestClient;
 import java.util.UUID;
 
 /**
- * Sends fire-and-forget HTTP notifications to payment-service and stock-service.
+ * Sends fire-and-forget notifications to payment-service (REST) and stock-service (gRPC).
  *
  * NOTE: calls are made within the calling transaction. A production implementation
- * should use the transactional outbox pattern to decouple DB commits from HTTP calls.
+ * should use the transactional outbox pattern to decouple DB commits from these calls.
  */
 public class IntegrationClient {
 
     private static final Logger log = LoggerFactory.getLogger(IntegrationClient.class);
 
     private final RestClient paymentClient;
-    private final RestClient stockClient;
+    private final StockServiceGrpc.StockServiceBlockingStub stockServiceStub;
 
-    public IntegrationClient(RestClient paymentClient, RestClient stockClient) {
+    public IntegrationClient(RestClient paymentClient, StockServiceGrpc.StockServiceBlockingStub stockServiceStub) {
         this.paymentClient = paymentClient;
-        this.stockClient = stockClient;
+        this.stockServiceStub = stockServiceStub;
     }
 
     public void notifyOrderCreated(Order order) {
@@ -43,28 +47,26 @@ public class IntegrationClient {
     }
 
     public void notifyReserveStock(Order order) {
-        log.info("Calling stock-service [POST /orders/reserve] for order {}", order.getId());
+        log.info("Calling stock-service [gRPC Reserve] for order {}", order.getId());
         try {
-            stockClient.post()
-                    .uri("/orders/reserve")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(new StockPayload(order.getId(), order.getProductName(), order.getQuantity()))
-                    .retrieve()
-                    .toBodilessEntity();
-        } catch (RestClientException e) {
+            stockServiceStub.reserve(ReserveRequest.newBuilder()
+                    .setOrderId(order.getId().toString())
+                    .setProductName(order.getProductName())
+                    .setQuantity(order.getQuantity())
+                    .build());
+        } catch (StatusRuntimeException e) {
             log.error("Call to stock-service failed for order {}: {}", order.getId(), e.getMessage());
             throw e;
         }
     }
 
     public void notifyCancelReservation(Order order) {
-        log.info("Calling stock-service [POST /orders/{}/cancel-reservation] for order {}", order.getId(), order.getId());
+        log.info("Calling stock-service [gRPC CancelReservation] for order {}", order.getId());
         try {
-            stockClient.post()
-                    .uri("/orders/{orderId}/cancel-reservation", order.getId())
-                    .retrieve()
-                    .toBodilessEntity();
-        } catch (RestClientException e) {
+            stockServiceStub.cancelReservation(OrderIdRequest.newBuilder()
+                    .setOrderId(order.getId().toString())
+                    .build());
+        } catch (StatusRuntimeException e) {
             log.error("Call to stock-service failed for order {}: {}", order.getId(), e.getMessage());
             throw e;
         }
@@ -84,19 +86,16 @@ public class IntegrationClient {
     }
 
     public void notifyShipOrder(Order order) {
-        log.info("Calling stock-service [POST /orders/{}/ship] for order {}", order.getId(), order.getId());
+        log.info("Calling stock-service [gRPC Ship] for order {}", order.getId());
         try {
-            stockClient.post()
-                    .uri("/orders/{orderId}/ship", order.getId())
-                    .retrieve()
-                    .toBodilessEntity();
-        } catch (RestClientException e) {
+            stockServiceStub.ship(OrderIdRequest.newBuilder()
+                    .setOrderId(order.getId().toString())
+                    .build());
+        } catch (StatusRuntimeException e) {
             log.error("Call to stock-service failed for order {}: {}", order.getId(), e.getMessage());
             throw e;
         }
     }
 
     private record OrderPayload(UUID orderId, String customerName, String productName, Integer quantity) {}
-    private record StockPayload(UUID orderId, String productName, Integer quantity) {}
-    private record OrderIdPayload(UUID orderId) {}
 }

@@ -2,6 +2,8 @@ package com.demo.orderengine.config;
 
 import com.demo.orderengine.integration.IntegrationClient;
 import com.demo.orderengine.integration.IntegrationProperties;
+import com.demo.stockservice.grpc.StockServiceGrpc;
+import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +12,10 @@ import org.springframework.web.client.RestClient;
 
 @Configuration
 @EnableConfigurationProperties(IntegrationProperties.class)
-public class RestClientConfig {
+public class IntegrationConfig {
+
+    @GrpcClient("stock-service")
+    private StockServiceGrpc.StockServiceBlockingStub stockServiceStub;
 
     @Bean
     public IntegrationClient integrationClient(RestClient.Builder builder, IntegrationProperties props) {
@@ -21,10 +26,6 @@ public class RestClientConfig {
                 .requestFactory(factory)
                 .baseUrl(props.paymentService().url())
                 .build();
-        RestClient stockClient = builder.clone()
-                .requestFactory(factory)
-                .baseUrl(props.stockService().url())
-                .build();
-        return new IntegrationClient(paymentClient, stockClient);
+        return new IntegrationClient(paymentClient, stockServiceStub);
     }
 }

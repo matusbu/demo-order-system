@@ -9,8 +9,10 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -29,10 +31,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("integration")
 @Testcontainers
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
+        "grpc.server.in-process-name=test-stock-service",
+        "grpc.client.stock-service.address=in-process:test-stock-service"
+})
 @EnableWireMock({
-        @ConfigureWireMock(name = "payment-service", baseUrlProperties = "integrations.payment-service.url"),
-        @ConfigureWireMock(name = "stock-service",   baseUrlProperties = "integrations.stock-service.url")
+        @ConfigureWireMock(name = "payment-service", baseUrlProperties = "integrations.payment-service.url")
 })
 class OrderIntegrationIT {
 
@@ -40,19 +44,25 @@ class OrderIntegrationIT {
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16");
 
+    @TestConfiguration
+    static class GrpcTestConfig {
+        @Bean
+        StockServiceTestDouble stockServiceTestDouble() {
+            return new StockServiceTestDouble();
+        }
+    }
+
     @InjectWireMock("payment-service")
     WireMockServer paymentWireMock;
 
-    @InjectWireMock("stock-service")
-    WireMockServer stockWireMock;
-
+    @Autowired StockServiceTestDouble stockServiceTestDouble;
     @Autowired TestRestTemplate restTemplate;
     @Autowired OrderRepository  orderRepository;
 
     @BeforeEach
     void reset() {
         paymentWireMock.resetAll();
-        stockWireMock.resetAll();
+        stockServiceTestDouble.reset();
         orderRepository.deleteAll();
     }
 
@@ -82,7 +92,6 @@ class OrderIntegrationIT {
     @Test
     void createOrder_persistsOrderAndNotifiesDownstreamServices() {
         paymentWireMock.stubFor(post("/orders").willReturn(ok()));
-        stockWireMock.stubFor(post("/orders/reserve").willReturn(ok()));
 
         ResponseEntity<Map> response = restTemplate.postForEntity(
                 "/orders",
@@ -95,7 +104,10 @@ class OrderIntegrationIT {
                 .get().extracting(Order::getStatus).isEqualTo(OrderStatus.CREATED);
 
         paymentWireMock.verify(postRequestedFor(urlEqualTo("/orders")));
-        stockWireMock.verify(postRequestedFor(urlEqualTo("/orders/reserve")));
+        assertThat(stockServiceTestDouble.reserveRequests).hasSize(1);
+        assertThat(stockServiceTestDouble.reserveRequests.get(0).getOrderId()).isEqualTo(id.toString());
+        assertThat(stockServiceTestDouble.reserveRequests.get(0).getProductName()).isEqualTo("iPhone 15");
+        assertThat(stockServiceTestDouble.reserveRequests.get(0).getQuantity()).isEqualTo(1);
     }
 
     // ── GET endpoints ─────────────────────────────────────────────────────────
@@ -147,13 +159,12 @@ class OrderIntegrationIT {
         assertThat(orderRepository.findById(order.getId())).isPresent()
                 .get().extracting(Order::getStatus).isEqualTo(OrderStatus.CANCELLED);
         paymentWireMock.verify(0, anyRequestedFor(anyUrl()));
-        stockWireMock.verify(0, anyRequestedFor(anyUrl()));
+        assertNoStockServiceCalls();
     }
 
     @Test
     void cancelOrder_fromReserved_transitionsToReleasingReservation_callsCancelReservation() {
         Order order = savedOrder("alice", OrderStatus.RESERVED, LocalDateTime.now());
-        stockWireMock.stubFor(post(urlMatching("/orders/.*/cancel-reservation")).willReturn(ok()));
 
         ResponseEntity<Map> response = restTemplate.exchange(
                 "/orders/{id}/cancel", org.springframework.http.HttpMethod.DELETE,
@@ -163,7 +174,7 @@ class OrderIntegrationIT {
         assertThat(response.getBody().get("status")).isEqualTo("RELEASING_RESERVATION");
         assertThat(orderRepository.findById(order.getId())).isPresent()
                 .get().extracting(Order::getStatus).isEqualTo(OrderStatus.RELEASING_RESERVATION);
-        stockWireMock.verify(postRequestedFor(urlMatching("/orders/.*/cancel-reservation")));
+        assertThat(stockServiceTestDouble.cancelReservationOrderIds).containsExactly(order.getId().toString());
     }
 
     // ── POST /webhook/stock ───────────────────────────────────────────────────
@@ -180,13 +191,12 @@ class OrderIntegrationIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(orderRepository.findById(order.getId())).isPresent()
                 .get().extracting(Order::getStatus).isEqualTo(OrderStatus.RESERVED);
-        stockWireMock.verify(0, anyRequestedFor(anyUrl()));
+        assertNoStockServiceCalls();
     }
 
     @Test
     void stockWebhook_stockReservedOnPaid_persistsReadyToShip_callsShipOrder() {
         Order order = savedOrder("alice", OrderStatus.PAID, LocalDateTime.now());
-        stockWireMock.stubFor(post(urlMatching("/orders/.*/ship")).willReturn(ok()));
 
         ResponseEntity<Map> response = restTemplate.postForEntity(
                 "/webhook/stock",
@@ -196,7 +206,7 @@ class OrderIntegrationIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(orderRepository.findById(order.getId())).isPresent()
                 .get().extracting(Order::getStatus).isEqualTo(OrderStatus.READY_TO_SHIP);
-        stockWireMock.verify(postRequestedFor(urlMatching("/orders/.*/ship")));
+        assertThat(stockServiceTestDouble.shipOrderIds).containsExactly(order.getId().toString());
     }
 
     // ── POST /webhook/payment ─────────────────────────────────────────────────
@@ -218,7 +228,6 @@ class OrderIntegrationIT {
     @Test
     void paymentWebhook_paymentTimeoutOnReserved_persistsReleasingReservation_callsCancelReservation() {
         Order order = savedOrder("alice", OrderStatus.RESERVED, LocalDateTime.now());
-        stockWireMock.stubFor(post(urlMatching("/orders/.*/cancel-reservation")).willReturn(ok()));
 
         ResponseEntity<Map> response = restTemplate.postForEntity(
                 "/webhook/payment",
@@ -228,7 +237,7 @@ class OrderIntegrationIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(orderRepository.findById(order.getId())).isPresent()
                 .get().extracting(Order::getStatus).isEqualTo(OrderStatus.RELEASING_RESERVATION);
-        stockWireMock.verify(postRequestedFor(urlMatching("/orders/.*/cancel-reservation")));
+        assertThat(stockServiceTestDouble.cancelReservationOrderIds).containsExactly(order.getId().toString());
     }
 
     // ── Error cases ───────────────────────────────────────────────────────────
@@ -272,6 +281,12 @@ class OrderIntegrationIT {
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────
+
+    private void assertNoStockServiceCalls() {
+        assertThat(stockServiceTestDouble.reserveRequests).isEmpty();
+        assertThat(stockServiceTestDouble.cancelReservationOrderIds).isEmpty();
+        assertThat(stockServiceTestDouble.shipOrderIds).isEmpty();
+    }
 
     private Order savedOrder(String customerName, OrderStatus status, LocalDateTime createdAt) {
         return orderRepository.save(Order.builder()
