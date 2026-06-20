@@ -16,7 +16,7 @@ public abstract class E2EBase {
     protected static ComposeContainer environment;
     protected static int orderEnginePort;
     protected static int paymentServicePort;
-    protected static int stockServicePort;
+    protected static int stockServiceGrpcPort;
 
     @BeforeAll
     static void startEnvironment() {
@@ -28,16 +28,16 @@ public abstract class E2EBase {
                 .withExposedService("payment-service", 8081,
                         Wait.forListeningPort()
                                 .withStartupTimeout(Duration.ofSeconds(60)))
-                .withExposedService("stock-service", 8082,
+                .withExposedService("stock-service", 9090,
                         Wait.forListeningPort()
                                 .withStartupTimeout(Duration.ofSeconds(60)))
                 .withLocalCompose(true);
 
         environment.start();
 
-        orderEnginePort    = environment.getServicePort("order-engine",    8080);
-        paymentServicePort = environment.getServicePort("payment-service", 8081);
-        stockServicePort   = environment.getServicePort("stock-service",   8082);
+        orderEnginePort      = environment.getServicePort("order-engine",    8080);
+        paymentServicePort   = environment.getServicePort("payment-service", 8081);
+        stockServiceGrpcPort = environment.getServicePort("stock-service",   9090);
     }
 
     @AfterAll

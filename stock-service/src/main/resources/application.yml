@@ -5,6 +5,10 @@ spring:
 server:
   port: 8082
 
+grpc:
+  server:
+    port: 9090
+
 integrations:
   order-engine:
     url: http://localhost:8080

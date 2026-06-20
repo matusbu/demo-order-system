@@ -1,6 +1,6 @@
 package com.demo.e2e.tasks;
 
-import com.demo.e2e.interactions.CallSimulateEndpoint;
+import com.demo.e2e.interactions.CallSimulateRpc;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Performable;
@@ -23,8 +23,6 @@ public class SimulateStockSoldOut implements Task {
     @Override
     @Step("{0} simulates stock sold out for order #orderId")
     public <T extends Actor> void performAs(T actor) {
-        actor.attemptsTo(
-                CallSimulateEndpoint.at("/simulate/stock-sold-out").withOrderId(orderId)
-        );
+        actor.attemptsTo(CallSimulateRpc.stockSoldOut(orderId));
     }
 }

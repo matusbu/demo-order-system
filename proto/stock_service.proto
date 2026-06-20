@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package com.demo.stockservice.grpc;
+
+option java_multiple_files = true;
+option java_package = "com.demo.stockservice.grpc";
+option java_outer_classname = "StockServiceProto";
+
+service StockService {
+  rpc Reserve(ReserveRequest) returns (StockReply);
+  rpc CancelReservation(OrderIdRequest) returns (StockReply);
+  rpc Ship(OrderIdRequest) returns (StockReply);
+
+  rpc SimulateStockAvailable(OrderIdRequest) returns (StockReply);
+  rpc SimulateStockSoldOut(OrderIdRequest) returns (StockReply);
+  rpc SimulateShipped(OrderIdRequest) returns (StockReply);
+  rpc SimulateDeliveryConfirmed(OrderIdRequest) returns (StockReply);
+}
+
+message ReserveRequest {
+  string order_id = 1;
+  string product_name = 2;
+  int32 quantity = 3;
+}
+
+message OrderIdRequest {
+  string order_id = 1;
+}
+
+message StockReply {
+}

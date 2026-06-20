@@ -1,6 +1,6 @@
 package com.demo.e2e.tasks;
 
-import com.demo.e2e.interactions.CallSimulateEndpoint;
+import com.demo.e2e.interactions.CallSimulateRpc;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Performable;
@@ -23,8 +23,6 @@ public class SimulateDeliveryConfirmed implements Task {
     @Override
     @Step("{0} confirms delivery for order #orderId")
     public <T extends Actor> void performAs(T actor) {
-        actor.attemptsTo(
-                CallSimulateEndpoint.at("/simulate/delivery-confirmed").withOrderId(orderId)
-        );
+        actor.attemptsTo(CallSimulateRpc.deliveryConfirmed(orderId));
     }
 }
