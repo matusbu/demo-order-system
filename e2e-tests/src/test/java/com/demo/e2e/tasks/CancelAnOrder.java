@@ -1,10 +1,10 @@
 package com.demo.e2e.tasks;
 
+import com.demo.e2e.interactions.CancelOrder;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Performable;
 import net.serenitybdd.screenplay.Task;
-import net.serenitybdd.screenplay.rest.interactions.Delete;
 
 import static net.serenitybdd.screenplay.Tasks.instrumented;
 
@@ -23,8 +23,6 @@ public class CancelAnOrder implements Task {
     @Override
     @Step("{0} cancels order #orderId")
     public <T extends Actor> void performAs(T actor) {
-        actor.attemptsTo(
-                Delete.from("/orders/" + orderId + "/cancel")
-        );
+        actor.attemptsTo(CancelOrder.withId(orderId));
     }
 }
