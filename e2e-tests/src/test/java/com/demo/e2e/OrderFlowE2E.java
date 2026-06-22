@@ -7,6 +7,7 @@ import com.demo.e2e.tasks.*;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.ensure.Ensure;
 import net.serenitybdd.screenplay.rest.abilities.CallAnApi;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +25,11 @@ class OrderFlowE2E extends E2EBase {
                 .whoCan(CallStockServiceGrpc.at("localhost", stockServiceGrpcPort));
         paymentSystem = Actor.named("PaymentSystem")
                 .whoCan(CallAnApi.at("http://localhost:" + paymentServicePort));
+    }
+
+    @AfterEach
+    void tearDownActors() {
+        warehouse.abilityTo(CallStockServiceGrpc.class).shutdown();
     }
 
     @Test

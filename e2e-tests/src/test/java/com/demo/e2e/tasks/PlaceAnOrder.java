@@ -1,11 +1,11 @@
 package com.demo.e2e.tasks;
 
+import com.demo.e2e.interactions.CreateOrder;
+import com.demo.e2e.questions.TheLastOrderId;
 import net.serenitybdd.annotations.Step;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Performable;
 import net.serenitybdd.screenplay.Task;
-import net.serenitybdd.rest.SerenityRest;
-import net.serenitybdd.screenplay.rest.interactions.Post;
 
 import static net.serenitybdd.screenplay.Tasks.instrumented;
 
@@ -28,15 +28,7 @@ public class PlaceAnOrder implements Task {
     @Override
     @Step("{0} places an order for #quantity x #productName")
     public <T extends Actor> void performAs(T actor) {
-        actor.attemptsTo(
-                Post.to("/orders")
-                        .with(request -> request
-                                .header("Content-Type", "application/json")
-                                .body(String.format(
-                                        "{\"customerName\":\"%s\",\"productName\":\"%s\",\"quantity\":%d}",
-                                        customerName, productName, quantity)))
-        );
-        String orderId = SerenityRest.lastResponse().jsonPath().getString("id");
-        actor.remember("orderId", orderId);
+        actor.attemptsTo(CreateOrder.with(customerName, productName, quantity));
+        actor.remember("orderId", TheLastOrderId.fromTheLastResponse().answeredBy(actor));
     }
 }
